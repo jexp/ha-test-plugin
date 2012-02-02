@@ -3,6 +3,7 @@
 
     <path id="classpath">
         <fileset dir="${basedir}/neo4j-enterprise-1.5.1/lib"/>
+        <fileset dir="${basedir}/lib"/>
       </path>
 
   <property name="out" value="out/production"/>
