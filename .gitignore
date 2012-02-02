@@ -1,0 +1,7 @@
+*.jar
+out
+neo4j-enterprise*
+*.iws
+*.iml
+*.ipr
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ha-test" default="all">
+
+    <path id="classpath">
+        <fileset dir="${basedir}/neo4j-enterprise-1.5.1/lib"/>
+      </path>
+
+  <property name="out" value="out/production"/>
+
+  <target name="all">
+      <delete file="ha-test.jar" dir="${out}"/>
+      <mkdir dir="${out}"/>
+      <javac srcdir="src" destdir="${out}" classpathref="classpath"/>
+      <copy todir="${out}/META-INF"> <fileset dir="src/META-INF" includes="**/*"/> </copy>
+      <jar  jarfile="ha-test.jar">
+        <fileset dir="${out}"/>
+      </jar>
+  </target>
+
+</project>
