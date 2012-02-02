@@ -8,6 +8,8 @@ import org.neo4j.server.plugins.PluginTarget;
 import org.neo4j.server.plugins.ServerPlugin;
 import org.neo4j.server.plugins.Source;
 
+import java.util.Random;
+
 @Description("Creates a part of a graph")
 public class HaTestPlugin extends ServerPlugin {
 
@@ -16,7 +18,7 @@ public class HaTestPlugin extends ServerPlugin {
     @PluginTarget(GraphDatabaseService.class)
     public Integer createGraph(@Source GraphDatabaseService gds, @Parameter(name = "count") int count, @Parameter(name = "rels") int relsPerNode) {
         GraphCreator graphCreator = new GraphCreator(gds);
-        int start = graphCreator.highestIdInUse();
+        int start = new Random().nextInt();
         return graphCreator.createNodes(start, count) + graphCreator.createRelationships(start, count, relsPerNode);
     }
 

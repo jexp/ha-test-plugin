@@ -20,7 +20,7 @@ import java.util.Set;
 class GraphCreator {
     private final GraphDatabaseService gds;
     private Index<Node> index;
-    private static final int BATCH_SIZE = 5000;
+    private static final int BATCH_SIZE = 50;
     private final Random random = new Random();
 
     public GraphCreator(GraphDatabaseService gds) {
@@ -64,16 +64,19 @@ class GraphCreator {
     int createNodes(int start, int count) {
         int created = 0;
         final Batcher batcher = newBatcher();
-        lock();
-        for (int i = 0; i < count; i++) {
-            final int id = start + i;
-            if (!nodeExists(id)) {
-                createNode(id);
-                created++;
-                batcher.batch();
+        try {
+            lock();
+            for (int i = 0; i < count; i++) {
+                final int id = start + i;
+                if (!nodeExists(id)) {
+                    createNode(id);
+                    created++;
+                    batcher.batch();
+                }
             }
+        } finally {
+            batcher.finish();
         }
-        batcher.finish();
         return created;
     }
 
@@ -89,18 +92,21 @@ class GraphCreator {
         final int maxNodes = highestIdInUse();
         int deleted = 0;
         final Batcher batcher = newBatcher();
-        lock();
-        Set<Integer> removedIds=new HashSet<Integer>();
-        for (int i = 0; i < count; i++) {
-            final int id = random.nextInt(maxNodes);
-            if (!removedIds.contains(id)) {
-                removedIds.add(id);
-                final int removedCount = removeNode(id);
-                deleted += removedCount;
-                batcher.batch(removedCount);
+        try {
+            lock();
+            Set<Integer> removedIds = new HashSet<Integer>();
+            for (int i = 0; i < count; i++) {
+                final int id = random.nextInt(maxNodes);
+                if (!removedIds.contains(id)) {
+                    removedIds.add(id);
+                    final int removedCount = removeNode(id);
+                    deleted += removedCount;
+                    batcher.batch(removedCount);
+                }
             }
+        } finally {
+            batcher.finish();
         }
-        batcher.finish();
         return deleted;
     }
 
