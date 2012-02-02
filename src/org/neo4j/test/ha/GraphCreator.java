@@ -30,13 +30,13 @@ class GraphCreator {
 
     int createRelationships(int start, int count, int relsPerNode) {
         int created = 0;
-        final int maxNodes = highestIdInUse();
         final Batcher batcher = newBatcher();
-        for (int i = start; i < count; i++) {
-            Node node = getNode(i);
+        for (int i = 0; i < count; i++) {
+            int id=start + i;
+            Node node = getNode(id);
             if (node == null) continue;
             for (int r = random.nextInt(relsPerNode / 2) + relsPerNode / 2; r >= 0; r--) {
-                Node other = getNode(random.nextInt(maxNodes));
+                Node other = getNode(random.nextInt(count));
                 if (other == null) continue;
                 node.createRelationshipTo(other, Types.from(r));
                 created++;
