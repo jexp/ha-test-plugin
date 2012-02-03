@@ -4,6 +4,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.kernel.AbstractGraphDatabase;
 import org.neo4j.kernel.Config;
@@ -31,19 +32,22 @@ class GraphCreator {
     int createRelationships(int start, int count, int relsPerNode) {
         int created = 0;
         final Batcher batcher = newBatcher();
-        for (int i = 0; i < count; i++) {
-            int id=start + i;
-            Node node = getNode(id);
-            if (node == null) continue;
-            for (int r = random.nextInt(relsPerNode / 2) + relsPerNode / 2; r >= 0; r--) {
-                Node other = getNode(random.nextInt(count));
-                if (other == null) continue;
-                node.createRelationshipTo(other, Types.from(r));
-                created++;
-                batcher.batch();
+        try {
+            for (int i = 0; i < count; i++) {
+                int id = start + i;
+                Node node = getNode(id);
+                if (node == null) continue;
+                for (int r = random.nextInt(relsPerNode / 2) + relsPerNode / 2; r >= 0; r--) {
+                    Node other = getNode(random.nextInt(count));
+                    if (other == null) continue;
+                    node.createRelationshipTo(other, Types.from(r));
+                    created++;
+                    batcher.batch();
+                }
             }
+        } finally {
+            batcher.finish();
         }
-        batcher.finish();
         return created;
     }
 
@@ -85,7 +89,11 @@ class GraphCreator {
     }
 
     private Node getNode(int id) {
-        return index.get("id", id).getSingle();
+        final IndexHits<Node> hits = index.get("id", id);
+        if (!hits.hasNext()) return null;
+        final Node result = hits.next();
+        hits.close();
+        return result;
     }
 
     public int removeRandomNodes(final int count) {
